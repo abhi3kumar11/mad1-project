@@ -58,3 +58,20 @@ class Score(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     total_scored = db.Column(db.Integer)
 
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    full_name = db.Column(db.String(100), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)  # New field
+
+
+def create_admin():
+    from app import db, bcrypt
+    hashed_password = bcrypt.generate_password_hash("admin123").decode("utf-8")
+    admin = User(email="admin@quizmaster.com", password=hashed_password, full_name="Admin", is_admin=True)
+    db.session.add(admin)
+    db.session.commit()
+
+

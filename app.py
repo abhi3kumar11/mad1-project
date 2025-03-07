@@ -28,3 +28,12 @@ def login():
         else:
             flash("Login unsuccessful. Check email and password.", "danger")
     return render_template("login.html", form=form)
+
+from flask_login import current_user, login_required
+
+@app.route("/admin/dashboard")
+@login_required
+def admin_dashboard():
+    if not current_user.is_admin:
+        return redirect(url_for("dashboard"))
+    return render_template("admin/dashboard.html")
