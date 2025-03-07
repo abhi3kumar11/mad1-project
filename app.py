@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
-from models import db, User, bcrypt
-from forms import RegistrationForm, LoginForm
+from models import db, User, bcrypt,Subject
+from forms import RegistrationForm, LoginForm,SubjectForm
 from flask_login import login_user, logout_user, login_required
 
 app = Flask(__name__)
@@ -37,3 +37,32 @@ def admin_dashboard():
     if not current_user.is_admin:
         return redirect(url_for("dashboard"))
     return render_template("admin/dashboard.html")
+
+@app.route("/admin/subjects", methods=["GET", "POST"])
+@login_required
+def manage_subjects():
+    if not current_user.is_admin:
+        return redirect(url_for("dashboard"))
+    
+    form = SubjectForm()
+    if form.validate_on_submit():
+        new_subject = Subject(name=form.name.data)
+        db.session.add(new_subject)
+        db.session.commit()
+        flash("Subject added successfully!", "success")
+        return redirect(url_for("manage_subjects"))
+    
+    subjects = Subject.query.all()
+    return render_template("admin/subjects.html", subjects=subjects, form=form)
+
+@app.route("/admin/subjects/delete/<int:subject_id>")
+@login_required
+def delete_subject(subject_id):
+    if not current_user.is_admin:
+        return redirect(url_for("dashboard"))
+    
+    subject = Subject.query.get_or_404(subject_id)
+    db.session.delete(subject)
+    db.session.commit()
+    flash("Subject deleted successfully!", "danger")
+    return redirect(url_for("manage_subjects"))
