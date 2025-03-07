@@ -57,3 +57,4 @@ class Score(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     total_scored = db.Column(db.Integer)
+
