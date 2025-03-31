@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Edit Quiz</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Title Field -->
+                        <div class="form-group">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control", placeholder="Enter quiz title", required=True) }}
+                        </div>
+                        
+                        <!-- Description Field -->
+                        <div class="form-group">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", placeholder="Enter quiz description") }}
+                        </div>
+                        
+                        <!-- Chapter Field -->
+                        <div class="form-group">
+                            {{ form.chapter_id.label(class="form-label") }}
+                            {{ form.chapter_id(class="form-control") }}
+                        </div>
+                        
+                        <!-- Time Limit Field -->
+                        <div class="form-group">
+                            {{ form.time_limit.label(class="form-label") }}
+                            {{ form.time_limit(class="form-control", placeholder="Enter time limit in minutes", required=True) }}
+                        </div>
+                        
+                        <!-- Submit and Cancel Buttons -->
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                            <a href="{{ url_for('admin.quiz_management') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

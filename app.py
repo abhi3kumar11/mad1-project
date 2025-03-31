@@ -1,68 +1,77 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
-from models import db, User, bcrypt,Subject
-from forms import RegistrationForm, LoginForm,SubjectForm
-from flask_login import login_user, logout_user, login_required
+from flask import Flask, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from controllers.models import init_db
+from controllers.auth_controller import auth_bp
+from controllers.admin_controller import admin_bp
+from controllers.quiz_controller import quiz_bp
+import logging
+import os
+from datetime import timedelta
 
+# Initialize Flask app
 app = Flask(__name__)
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
-        user = User(email=form.email.data, password=hashed_password, full_name="User Name")
-        db.session.add(user)
-        db.session.commit()
-        flash("Account created successfully!", "success")
-        return redirect(url_for("login"))
-    return render_template("register.html", form=form)
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz_master.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.urandom(24)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)
-            return redirect(url_for("dashboard"))
-        else:
-            flash("Login unsuccessful. Check email and password.", "danger")
-    return render_template("login.html", form=form)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-from flask_login import current_user, login_required
+# Initialize database
+init_db(app)
 
-@app.route("/admin/dashboard")
-@login_required
-def admin_dashboard():
-    if not current_user.is_admin:
-        return redirect(url_for("dashboard"))
-    return render_template("admin/dashboard.html")
+# Register blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(quiz_bp)
 
-@app.route("/admin/subjects", methods=["GET", "POST"])
-@login_required
-def manage_subjects():
-    if not current_user.is_admin:
-        return redirect(url_for("dashboard"))
+# Error handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+
+# Root route
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Create upload directory if it doesn't exist
+def create_upload_dir():
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
+if __name__ == '__main__':
+    with app.app_context():
+        try:
+            # Create upload directory
+            create_upload_dir()
+            
+            # Initialize database and create admin user
+            from controllers.models import db, create_admin_if_not_exists
+            
+            # Drop all tables and recreate them
+            db.drop_all()  # This will delete the existing database
+            db.create_all()  # This will create a new database with the correct schema
+            
+            create_admin_if_not_exists()
+            logger.info("Database initialized successfully!")
+            
+        except Exception as e:
+            logger.error(f"Error during initialization: {e}")
+            raise e
     
-    form = SubjectForm()
-    if form.validate_on_submit():
-        new_subject = Subject(name=form.name.data)
-        db.session.add(new_subject)
-        db.session.commit()
-        flash("Subject added successfully!", "success")
-        return redirect(url_for("manage_subjects"))
-    
-    subjects = Subject.query.all()
-    return render_template("admin/subjects.html", subjects=subjects, form=form)
-
-@app.route("/admin/subjects/delete/<int:subject_id>")
-@login_required
-def delete_subject(subject_id):
-    if not current_user.is_admin:
-        return redirect(url_for("dashboard"))
-    
-    subject = Subject.query.get_or_404(subject_id)
-    db.session.delete(subject)
-    db.session.commit()
-    flash("Subject deleted successfully!", "danger")
-    return redirect(url_for("manage_subjects"))
+    # Run the application
+    app.run(debug=True)

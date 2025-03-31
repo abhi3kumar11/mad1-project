@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>{{ quiz.title }}</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Description:</strong> {{ quiz.description }}</p>
+            <p><strong>Chapter:</strong> {{ quiz.chapter.name }}</p>
+            <p><strong>Subject:</strong> {{ quiz.chapter.subject.name }}</p>
+            <p><strong>Time Limit:</strong> {{ quiz.time_limit }} minutes</p>
+            <p><strong>Number of Questions:</strong> {{ questions|length }}</p>
+            
+            {% if previous_attempts %}
+                <div class="alert alert-info">
+                    <h5>Your Previous Attempts</h5>
+                    <ul>
+                        {% for attempt in previous_attempts %}
+                            <li>
+                                {{ attempt.attempt_date.strftime('%Y-%m-%d %H:%M') }} - 
+                                Score: {{ attempt.score }}/{{ attempt.total_questions }} 
+                                ({{ (attempt.score / attempt.total_questions * 100) | round(2) }}%)
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('quiz.start_quiz', quiz_id=quiz.id) }}" class="btn btn-success btn-lg">Start Quiz</a>
+                <a href="{{ url_for('quiz.user_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

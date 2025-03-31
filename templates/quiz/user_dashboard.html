@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Welcome to Quiz Master</h2>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Available Subjects</h5>
+                </div>
+                <div class="card-body">
+                    {% if subjects %}
+                        <div class="accordion" id="subjectAccordion">
+                            {% for subject in subjects %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ subject.id }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ subject.id }}">
+                                            {{ subject.name }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ subject.id }}" class="accordion-collapse collapse" data-bs-parent="#subjectAccordion">
+                                        <div class="accordion-body">
+                                            <p>{{ subject.description }}</p>
+                                            <h6>Chapters:</h6>
+                                            <ul class="list-group">
+                                                {% for chapter in subject.chapters %}
+                                                    <li class="list-group-item">
+                                                        <div>
+                                                            <strong>{{ chapter.name }}</strong>
+                                                            <p class="mb-1">{{ chapter.description }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#quizzes{{ chapter.id }}">
+                                                                Show Quizzes
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                    <div class="collapse" id="quizzes{{ chapter.id }}">
+                                                        <ul class="list-group">
+                                                            {% for quiz in chapter.quizzes %}
+                                                                <li class="list-group-item">
+                                                                    <div>
+                                                                        <strong>{{ quiz.title }}</strong>
+                                                                        <p class="mb-1">{{ quiz.description }}</p>
+                                                                        <small>Time Limit: {{ quiz.time_limit }} minutes</small>
+                                                                    </div>
+                                                                    <div>
+                                                                        <a href="{{ url_for('quiz.view_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-success">Take Quiz</a>
+                                                                    </div>
+                                                                </li>
+                                                            {% else %}
+                                                                <li class="list-group-item">No quizzes available for this chapter.</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% else %}
+                                                    <li class="list-group-item">No chapters available for this subject.</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>No subjects available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Recent Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_attempts %}
+                        <ul class="list-group">
+                            {% for attempt in recent_attempts %}
+                                <li class="list-group-item">
+                                    <strong>{{ attempt.quiz.title }}</strong>
+                                    <p class="mb-1">Score: {{ attempt.score }}/{{ attempt.total_questions }} ({{ (attempt.score / attempt.total_questions * 100) | round(2) }}%)</p>
+                                    <small>{{ attempt.attempt_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="mt-3">
+                            <a href="{{ url_for('quiz.scores') }}" class="btn btn-info">View All Scores</a>
+                        </div>
+                    {% else %}
+                        <p>You haven't taken any quizzes yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Performance Summary</h5>
+                </div>
+                <div class="card-body text-center">
+                    <a href="{{ url_for('quiz.user_summary_chart') }}" class="btn btn-success">View Performance Charts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

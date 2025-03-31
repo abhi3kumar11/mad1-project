@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2>User Summary</h2>
+        </div>
+        <div class="card-body">
+            <p>Total Attempts: {{ total_attempts }}</p>
+            <p>Average Score: {{ average_score }}</p>
+            <p>Highest Score: {{ highest_score }}</p>
+            <p>Lowest Score: {{ lowest_score }}</p>
+
+            <h4>Recent Scores</h4>
+            <ul>
+                {% for i in range(total_attempts) %}
+                    <li>{{ scores[i] }} ({{ dates[i] }})</li>
+                {% else %}
+                    <li>No recent scores available.</li>
+                {% endfor %}
+            </ul>
+            
+            <!-- Bar Chart -->
+            <h4>Scores Over Time</h4>
+            <canvas id="scoreChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('scoreChart').getContext('2d');
+    
+    // Data for the chart
+    var chartData = {
+        labels: {{ dates | tojson }},  // Dates as x-axis labels
+        datasets: [{
+            label: 'User Scores',
+            data: {{ scores | tojson }},  // Scores as data points
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',  // Light blue fill
+            borderColor: 'rgba(54, 162, 235, 1)',  // Blue border
+            borderWidth: 1
+        }]
+    };
+
+    // Options for the chart
+    var chartOptions = {
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,  // Set maximum Y-axis value as 100 (optional)
+            }
+        }
+    };
+
+    // Create the chart
+    var scoreChart = new Chart(ctx, {
+        type: 'bar',  // Bar chart type
+        data: chartData,
+        options: chartOptions
+    });
+</script>
+{% endblock %}

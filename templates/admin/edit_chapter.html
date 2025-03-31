@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Edit Chapter</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Name Field -->
+                        <div class="form-group">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control", placeholder="Enter chapter name", required=True) }}
+                        </div>
+                        
+                        <!-- Description Field -->
+                        <div class="form-group">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", placeholder="Enter chapter description") }}
+                        </div>
+                        
+                        <!-- Subject Field -->
+                        <div class="form-group">
+                            {{ form.subject_id.label(class="form-label") }}
+                            {{ form.subject_id(class="form-control") }}
+                        </div>
+                        
+                        <!-- Submit and Cancel Buttons -->
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
