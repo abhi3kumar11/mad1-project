@@ -23,8 +23,8 @@ Quiz Master is a multi-user application designed for exam preparation, offering 
    The application does not require the admin to register through the UI. Instead, the admin account is pre-configured when the database is initialized.  
    
    **Admin Credentials** (pre-set in the database):
-   - **Username/Email**: `admin@quizmaster.com`  
-   - **Password**: `adminpassword`  
+   - **Username/Email**: `admin@gmail.com`  
+   - **Password**: `admin_password`  
 
 2. **Login Procedure**:  
    - Open the application in your web browser by navigating to `http://127.0.0.1:5000` (or the relevant URL if deployed to a server).
